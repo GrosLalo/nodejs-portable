@@ -32,6 +32,7 @@ TITLE Node.js Portable v1.5
 :: Settings
 SET nodejsVersion=0.10.26
 SET nodejsArch=x86
+:: SET proxy=http://<opt_username>:<opt_password>@<ip_or_domain>:<opt_port>
 
 :: Batch vars (no edits necessary)
 SET nodejsPath=%~dp0
@@ -43,8 +44,6 @@ SET nodejsInstallVbs=%TEMP%\nodejs_install.vbs
 SET nodejsMsiPackage=node-v%nodejsVersion%-%nodejsArch%.msi
 IF %nodejsArch%==x64 SET nodejsUrl=http://nodejs.org/dist/v%nodejsVersion%/x64/%nodejsMsiPackage%
 IF %nodejsArch%==x86 SET nodejsUrl=http://nodejs.org/dist/v%nodejsVersion%/%nodejsMsiPackage%
-
-
 
 ::::::::::::::::::::::::::::::::::::::::
 :MENU
@@ -66,8 +65,6 @@ IF %nodejsTask% == 2 GOTO INSTALL
 IF %nodejsTask% == 9 GOTO EXIT
 GOTO MENU
 
-
-
 ::::::::::::::::::::::::::::::::::::::::
 :INSTALL
 ::::::::::::::::::::::::::::::::::::::::
@@ -84,8 +81,12 @@ ECHO WScript.StdOut.Write "Download " ^& "%nodejsUrl%" ^& " ">%nodejsInstallVbs%
 :: Switched to 'WinHttp.WinHttpRequest.5.1'
 ECHO dim http: set http = createobject("WinHttp.WinHttpRequest.5.1") >>%nodejsInstallVbs%
 ECHO dim bStrm: set bStrm = createobject("Adodb.Stream") >>%nodejsInstallVbs%
-:: Open in asynchronous mode.
+:: Open in asynchronous mode
 ECHO http.Open "GET", "%nodejsUrl%", True >>%nodejsInstallVbs%
+
+:: Use Proxy configuration if defined above (see settings)
+IF DEFINED proxy ECHO http.SetProxy 2, "%proxy%", "" >>%nodejsInstallVbs%
+
 ECHO http.Send >>%nodejsInstallVbs%
 :: Every second write a '.' until the download is complete
 ECHO while http.WaitForResponse(0) = 0 >>%nodejsInstallVbs%
@@ -121,8 +122,6 @@ IF EXIST "%nodejsPath%\node.exe" ECHO node.js successfully installed in '%nodejs
 IF NOT EXIST "%nodejsPath%\node.exe" ECHO An error occurred during the installation.
 GOTO PREPARE
 
-
-
 ::::::::::::::::::::::::::::::::::::::::
 :LAUNCH
 ::::::::::::::::::::::::::::::::::::::::
@@ -134,8 +133,6 @@ IF NOT %nodejsTask% == 0 GOTO PREPARE
 :: Init node vars
 cmd.exe /k "cd "%nodejsWork%" && "%nodejsPath%\nodevars.bat" && "%nodejsPath%\npm" config set globalconfig "%npmGlobalConfigFilePath%" --global"
 GOTO MENU
-
-
 
 ::::::::::::::::::::::::::::::::::::::::
 :PREPARE
@@ -155,8 +152,6 @@ IF NOT EXIST "%npmPath%\cache" MKDIR "%npmPath%\cache"
 IF %nodejsTask% == 1 SET nodejsTask=0 && GOTO LAUNCH
 GOTO EOF
 
-
-
 ::::::::::::::::::::::::::::::::::::::::
 :EOF
 ::::::::::::::::::::::::::::::::::::::::
@@ -164,8 +159,6 @@ GOTO EOF
 ECHO.
 PAUSE
 GOTO MENU
-
-
 
 ::::::::::::::::::::::::::::::::::::::::
 :EXIT

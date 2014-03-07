@@ -20,6 +20,7 @@ Tested on Windows XP, Windows Vista and Windows 7.
 In the ``Settings`` section line 32, you can change :
 * ``nodejsVersion`` : The node.js version.
 * ``nodejsArch`` : The OS architecture (``x86`` or ``x64``)
+* ``proxy`` : Proxy details in case one is required for downloading Node.js
 
 ## Note
 
